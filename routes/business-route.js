@@ -1,6 +1,6 @@
 const express = require('express');
 const createError = require('http-errors');
-
+const mongoose = require('mongoose');
 const router = express.Router();
 
 const Business = require('../models/business');
@@ -18,6 +18,9 @@ router.get('/', (req, res, next) => {
       res.json(err);
     })
 });
+
+
+// POST add worker =============================================================
 
 router.post('/workers/add', (req, res, next) => {
   const { name, type } = req.body;
@@ -42,7 +45,6 @@ router.post('/workers/add', (req, res, next) => {
         .catch(err => {
           res.status(500).json(err);
       })
-
         res.json({message:"worker added"}).status(202)
       }).catch((err)=>{
         next(err)
@@ -54,6 +56,66 @@ router.post('/workers/add', (req, res, next) => {
     next(err)
   })
 });
+
+// GET worker details =============================================================
+
+router.get('/workers/:id', (req, res) => {
+  const { id } = req.params;
+
+  if ( !mongoose.Types.ObjectId.isValid(id)) {
+    res
+      .status(400)  //  Bad Request
+      .json({ message: 'Specified id is not valid'})
+    return;
+  }
+
+  Worker.findById( id )
+    .then( (foundWorker) => {
+      console.log("worker id ", foundWorker)
+      res.status(200).json(foundWorker);
+    })
+    .catch((err) => {
+      res.res.status(500).json(err);
+    })
+  });
+
+// PUT update worker =============================================================
+
+router.put('/workers/:id/update', (req, res, next)=>{
+
+  if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    res.status(400).json({ message: 'Specified id is not valid' });
+    return;
+  }
+
+  Worker.findByIdAndUpdate(req.params.id, req.body)
+    .then(() => {
+      res.json({ message: `Worker with ${req.params.id} is updated successfully.` });
+    })
+    .catch(err => {
+      res.json(err);
+    })
+})
+
+// DELETE delete worker =============================================================
+
+router.delete('/workers/:id/delete', (req, res, next)=>{
+
+  if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    res.status(400).json({ message: 'Specified id is not valid' });
+    return;
+  }
+
+  Worker.findByIdAndRemove(req.params.id)
+    .then(() => {
+      res.json({ message: `Worker with ${req.params.id} is been deleted successfully.` });
+    })
+    .catch(err => {
+      res.json(err);
+    })
+})
+
+// POST add promotion =============================================================
 
 router.post('/promotions/add', (req, res, next) => {
   const { name, type, pointsToUnlock } = req.body;
