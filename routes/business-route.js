@@ -88,13 +88,30 @@ router.put('/workers/:id/update', (req, res, next)=>{
     return;
   }
 
-  Worker.findByIdAndUpdate(req.params.id, req.body)
+  Business.findById(req.session.currentUser._id).populate('workers')
+  .then((business)=>{
+
+    let workerExists = false;
+    business.workers.forEach((elem)=>{
+      if (elem.name === req.body.name) return workerExists = true
+    })
+
+    if (!workerExists){
+
+   Worker.findByIdAndUpdate(req.params.id, req.body)
     .then(() => {
       res.json({ message: `Worker with ${req.params.id} is updated successfully.` });
     })
     .catch(err => {
       res.json(err);
     })
+
+    }else{
+    return next(createError(422));
+    }
+      }).catch((err)=>{
+      next(err)
+     })
 })
 
 // DELETE delete worker =============================================================
@@ -142,6 +159,7 @@ router.post('/promotions/add', (req, res, next) => {
       })
 
         res.json({message:"promotion added"}).status(202)
+
       }).catch((err)=>{
         next(err)
       })
@@ -183,14 +201,39 @@ router.put('/promotions/:id/update', (req, res, next)=>{
     return;
   }
 
-  Promotion.findByIdAndUpdate(req.params.id, req.body)
-    .then(() => {
-      res.json({ message: `Promotion with ${req.params.id} is updated successfully.` });
+  Business.findById(req.session.currentUser._id).populate('promotions')
+  .then((business)=>{
+
+    let promotionExists = false;
+    business.promotions.forEach((elem)=>{
+      if (elem.pointsToUnlock === req.body.pointsToUnlock) return promotionExists = true
     })
-    .catch(err => {
-      res.json(err);
-    })
+
+    if (!promotionExists){
+      Promotion.findByIdAndUpdate(req.params.id, req.body)
+      .then(() => {
+        res.json({ message: `Promotion with ${req.params.id} is updated successfully.` });
+      })
+      .catch(err => {
+        res.json(err);
+      })
+
+      }else{
+      return next(createError(422));
+    }
+  }).catch((err)=>{
+    next(err)
+  })
 })
+
+
+
+
+
+
+
+
+
 
 // DELETE delete promotion =============================================================
 
