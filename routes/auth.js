@@ -4,7 +4,8 @@ const createError = require('http-errors');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 
-const User = require('../models/user');
+const Business = require('../models/business');
+const Customer = require('../models/customer');
 
 const {
   isLoggedIn,
@@ -23,7 +24,7 @@ router.post(
   async (req, res, next) => {
     const { username, password } = req.body;
     try {
-      const user = await User.findOne({ username });
+      const user = await Business.findOne({ username });
       if (!user) {
         next(createError(404));
       } else if (bcrypt.compareSync(password, user.password)) {
@@ -43,16 +44,16 @@ router.post(
   isNotLoggedIn(),
   validationLoggin(),
   async (req, res, next) => {
-    const { username, password } = req.body;
+    const { username, password, email, location } = req.body;
 
     try {
-      const user = await User.findOne({ username }, 'username');
+      const user = await Business.findOne({ username }, 'username');
       if (user) {
         return next(createError(422));
       } else {
         const salt = bcrypt.genSaltSync(10);
         const hashPass = bcrypt.hashSync(password, salt);
-        const newUser = await User.create({ username, password: hashPass });
+        const newUser = await Business.create({ username, password: hashPass, email, location });
         req.session.currentUser = newUser;
         res.status(200).json(newUser);
       }
