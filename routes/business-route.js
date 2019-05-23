@@ -8,6 +8,8 @@ const Customer = require('../models/customer');
 const Worker = require('./../models/worker');
 const Promotion = require('./../models/promotion')
 
+// GET business =============================================================
+
 router.get('/', (req, res, next) => {
 
   Business.findById(req.session.currentUser._id).populate('workers').populate('promotions')
@@ -18,7 +20,6 @@ router.get('/', (req, res, next) => {
       res.json(err);
     })
 });
-
 
 // POST add worker =============================================================
 
@@ -71,7 +72,7 @@ router.get('/workers/:id', (req, res) => {
 
   Worker.findById( id )
     .then( (foundWorker) => {
-      console.log("worker id ", foundWorker)
+
       res.status(200).json(foundWorker);
     })
     .catch((err) => {
@@ -225,14 +226,6 @@ router.put('/promotions/:id/update', (req, res, next)=>{
     next(err)
   })
 })
-
-
-
-
-
-
-
-
 
 
 // DELETE delete promotion =============================================================

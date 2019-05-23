@@ -6,11 +6,11 @@ const customerSchema = new Schema({
   password: { type:String, required:true }, 
   email: { type:String, required:true, unique:true }, 
   location: { type:String, required:true},
-  userType: String,
+  userType: { type: String, default: 'customer'},
   imgUrl: { type: String, default: 'https://i.pinimg.com/originals/14/ca/1d/14ca1d18880796ce81bde18268e32b8e.jpg'},
   balance: { type:Number, min: 0},
   pinnedbusiness: [{
-    businessID : [{type: Schema.Types.ObjectId, ref: 'Customer'}],
+    business : [{type: Schema.Types.ObjectId, ref: 'Business'}],
     points: { type:Number,  min: 0 }
   }]
 }, {

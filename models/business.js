@@ -6,7 +6,7 @@ const businessSchema = new Schema({
   password: { type:String,  required:true },
   email: { type:String, required:true, unique:true}, 
   location: { type:String, required:true},
-  userType: String,
+  userType: { type: String, default: 'business'},
   imgUrl:  {type: String, default: 'https://www.cinematographe.it/wp-content/uploads/2016/03/grootsupper1.jpg' },
   workers: [{type: Schema.Types.ObjectId, ref: 'Worker'}],
   promotions: [{type: Schema.Types.ObjectId, ref: 'Promotion'}]

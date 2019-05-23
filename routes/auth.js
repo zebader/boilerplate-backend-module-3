@@ -44,8 +44,8 @@ router.post(
   isNotLoggedIn(),
   validationLoggin(),
   async (req, res, next) => {
-    const { username, password, email, location } = req.body;
-
+    const { username, password, email, location, userType } = req.body;
+/* if userType business */
     try {
       const user = await Business.findOne({ username }, 'username');
       if (user) {
