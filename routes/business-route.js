@@ -153,4 +153,61 @@ router.post('/promotions/add', (req, res, next) => {
   })
 });
 
+// GET promotions details =============================================================
+
+router.get('/promotions/:id', (req, res) => {
+  const { id } = req.params;
+
+  if ( !mongoose.Types.ObjectId.isValid(id)) {
+    res
+      .status(400)  //  Bad Request
+      .json({ message: 'Specified id is not valid'})
+    return;
+  }
+
+  Promotion.findById( id )
+    .then( (foundPromotion) => {
+      res.status(200).json(foundPromotion);
+    })
+    .catch((err) => {
+      res.res.status(500).json(err);
+    })
+  });
+
+// PUT update promotion =============================================================
+
+router.put('/promotions/:id/update', (req, res, next)=>{
+
+  if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    res.status(400).json({ message: 'Specified id is not valid' });
+    return;
+  }
+
+  Promotion.findByIdAndUpdate(req.params.id, req.body)
+    .then(() => {
+      res.json({ message: `Promotion with ${req.params.id} is updated successfully.` });
+    })
+    .catch(err => {
+      res.json(err);
+    })
+})
+
+// DELETE delete promotion =============================================================
+
+router.delete('/promotions/:id/delete', (req, res, next)=>{
+
+  if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    res.status(400).json({ message: 'Specified id is not valid' });
+    return;
+  }
+
+  Promotion.findByIdAndRemove(req.params.id)
+    .then(() => {
+      res.json({ message: `Promotion with ${req.params.id} is been deleted successfully.` });
+    })
+    .catch(err => {
+      res.json(err);
+    })
+})
+
 module.exports = router;
