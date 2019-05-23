@@ -22,9 +22,27 @@ router.post(
   isNotLoggedIn(),
   validationLoggin(),
   async (req, res, next) => {
-    const { username, password } = req.body;
+    const { username, password , userType } = req.body;
+
+    if (userType === "business"){
+      try {
+        const user = await Business.findOne({ username });
+        if (!user) {
+          next(createError(404));
+        } else if (bcrypt.compareSync(password, user.password)) {
+          req.session.currentUser = user;
+          return res.status(200).json(user);
+        } else {
+          next(createError(401));
+        }
+      } catch (error) {
+        next(error);
+      }
+      return
+    }
+
     try {
-      const user = await Business.findOne({ username });
+      const user = await Customer.findOne({ username });
       if (!user) {
         next(createError(404));
       } else if (bcrypt.compareSync(password, user.password)) {
@@ -36,7 +54,7 @@ router.post(
     } catch (error) {
       next(error);
     }
-  },
+    },
 );
 
 router.post(
@@ -45,8 +63,9 @@ router.post(
   validationLoggin(),
   async (req, res, next) => {
     const { username, password, email, location, userType } = req.body;
-/* if userType business */
-    try {
+
+    if (userType === "business"){
+      try {
       const user = await Business.findOne({ username }, 'username');
       if (user) {
         return next(createError(422));
@@ -54,6 +73,23 @@ router.post(
         const salt = bcrypt.genSaltSync(10);
         const hashPass = bcrypt.hashSync(password, salt);
         const newUser = await Business.create({ username, password: hashPass, email, location });
+        req.session.currentUser = newUser;
+        res.status(200).json(newUser);
+      }
+    } catch (error) {
+      next(error);
+    }
+    return
+  }
+
+    try {
+      const user = await Customer.findOne({ username }, 'username');
+      if (user) {
+        return next(createError(422));
+      } else {
+        const salt = bcrypt.genSaltSync(10);
+        const hashPass = bcrypt.hashSync(password, salt);
+        const newUser = await Customer.create({ username, password: hashPass, email, location });
         req.session.currentUser = newUser;
         res.status(200).json(newUser);
       }

@@ -3,6 +3,12 @@ const createError = require('http-errors');
 const mongoose = require('mongoose');
 const router = express.Router();
 
+const {
+  isLoggedIn,
+  isNotLoggedIn,
+  validationLoggin,
+} = require('../helpers/middlewares');
+
 const Business = require('../models/business');
 const Customer = require('../models/customer');
 const Worker = require('./../models/worker');
@@ -10,7 +16,7 @@ const Promotion = require('./../models/promotion')
 
 // GET business with promotion =============================================================
 
-router.get('/', (req, res, next) => {
+router.get('/', isLoggedIn(), (req, res, next) => {
 
   Business.find().populate('workers').populate('promotions')
     .then(business => {
@@ -123,9 +129,9 @@ router.get('/:id/:promoId', (req, res) => {
 
 router.put('/:id/:promoId/update', (req, res, next) => {
 
-  Promotion.findByIdAndUpdate(req.params.promoId,{$push:{userId:req.session.currentUser._id}}).populate('userID')
+  Promotion.findByIdAndUpdate(req.params.promoId,{$push:{userId:req.session.currentUser._id}}, {new:true}).populate('userID')
   .then((promotion)=>{
-    res.json({ message: `Customer with ${req.params.workerId} is updated successfully.` });
+    res.json({ message: `Customer with ${req.params.workerId} is updated successfully.`, promotion });
   }).catch((err)=>{
     next(err)
   })

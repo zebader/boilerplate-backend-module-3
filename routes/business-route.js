@@ -3,6 +3,12 @@ const createError = require('http-errors');
 const mongoose = require('mongoose');
 const router = express.Router();
 
+const {
+  isLoggedIn,
+  isNotLoggedIn,
+  validationLoggin,
+} = require('../helpers/middlewares');
+
 const Business = require('../models/business');
 const Customer = require('../models/customer');
 const Worker = require('./../models/worker');
@@ -10,7 +16,7 @@ const Promotion = require('./../models/promotion')
 
 // GET business =============================================================
 
-router.get('/', (req, res, next) => {
+router.get('/', isLoggedIn(), (req, res, next) => {
 
   Business.findById(req.session.currentUser._id).populate('workers').populate('promotions')
     .then(business => {
@@ -39,7 +45,7 @@ router.post('/workers/add', (req, res, next) => {
       Worker.create({ name, type })
       .then((newWorker)=>{
 
-        Business.findByIdAndUpdate( businessId, { $push:{ workers: newWorker } })
+        Business.findByIdAndUpdate( businessId, { $push:{ workers: newWorker } }, {new:true})
         .then((theResponse) => {
           res.status(201).json(theResponse);
         })
@@ -99,8 +105,8 @@ router.put('/workers/:id/update', (req, res, next)=>{
 
     if (!workerExists){
 
-   Worker.findByIdAndUpdate(req.params.id, req.body)
-    .then(() => {
+   Worker.findByIdAndUpdate(req.params.id, req.body, {new:true})
+    .then((worker) => {
       res.json({ message: `Worker with ${req.params.id} is updated successfully.` });
     })
     .catch(err => {
@@ -211,7 +217,7 @@ router.put('/promotions/:id/update', (req, res, next)=>{
     })
 
     if (!promotionExists){
-      Promotion.findByIdAndUpdate(req.params.id, req.body)
+      Promotion.findByIdAndUpdate(req.params.id, req.body, {new:true})
       .then(() => {
         res.json({ message: `Promotion with ${req.params.id} is updated successfully.` });
       })

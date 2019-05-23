@@ -3,13 +3,19 @@ const createError = require('http-errors');
 const mongoose = require('mongoose');
 const router = express.Router();
 
+const {
+  isLoggedIn,
+  isNotLoggedIn,
+  validationLoggin,
+} = require('../helpers/middlewares');
+
 const Business = require('../models/business');
 const Customer = require('../models/customer');
-const Worker = require('./../models/worker');
-const Promotion = require('./../models/promotion')
+const Worker = require('../models/worker');
+const Promotion = require('../models/promotion')
 
-router.get('/', (req, res, next) => {
-/* helpers validacion */
+router.get('/', isLoggedIn(), (req, res, next) => {
+
   Customer.findById(req.session.currentUser._id).populate('pinnedbusiness.businessID')
     .then(customer => {
       res.json(customer);
@@ -22,7 +28,7 @@ router.get('/', (req, res, next) => {
 // PUT update customer =============================================================
 
 router.put('/update', (req, res, next)=>{
-  /* form rellenado? */
+  /* Cuidado que el form puede no estar relleno user set */
    Customer.findByIdAndUpdate(req.session.currentUser._id, req.body, {new:true})
     .then((customer) => {
       req.session.currentUser = customer
@@ -31,14 +37,13 @@ router.put('/update', (req, res, next)=>{
     .catch(err => {
       res.json(err);
     })
-
 })
 
 // PUT update wallet ========================================================
 
 router.put('/wallet/update', (req, res, next)=>{
 
-  /* const balanceFinal = req.session.currentUser.balance ... */
+  const balanceFinal = req.session.currentUser.balance + req.body.balance
 
   Customer.findByIdAndUpdate(req.session.currentUser._id, {$set: {balance : balanceFinal}}, {new:true})
   .then((customer) => {

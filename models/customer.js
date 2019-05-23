@@ -8,10 +8,10 @@ const customerSchema = new Schema({
   location: { type:String, required:true},
   userType: { type: String, default: 'customer'},
   imgUrl: { type: String, default: 'https://i.pinimg.com/originals/14/ca/1d/14ca1d18880796ce81bde18268e32b8e.jpg'},
-  balance: { type:Number, min: 0},
+  balance: { type:Number, min: 0, default:0},
   pinnedbusiness: [{
     business : [{type: Schema.Types.ObjectId, ref: 'Business'}],
-    points: { type:Number,  min: 0 }
+    points: { type:Number,  min: 0, default:0 }
   }]
 }, {
   timestamps: {
