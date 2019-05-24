@@ -18,6 +18,10 @@ const Promotion = require('./../models/promotion')
 
 router.get('/', isLoggedIn(), (req, res, next) => {
 
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
+
   Business.find().populate('workers').populate('promotions')
     .then(business => {
       res.json(business);
@@ -29,8 +33,12 @@ router.get('/', isLoggedIn(), (req, res, next) => {
 
 // GET promotion details (business and customer)=============================================================
 
-router.get('/:id', (req, res) => {
+router.get('/:id', (req, res, next) => {
   const { id } = req.params;
+
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
 
   if ( !mongoose.Types.ObjectId.isValid(id)) {
     res
@@ -51,10 +59,14 @@ router.get('/:id', (req, res) => {
 
 // GET worker details =============================================================
 
-router.get('/:id/:workedId', (req, res) => {
+router.get('/:id/workers/:workerId', (req, res, next) => {
+
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
   const { workerId } = req.params;
 
-  if ( !mongoose.Types.ObjectId.isValid(id)) {
+  if ( !mongoose.Types.ObjectId.isValid(req.params.id)) {
     res
       .status(400)  //  Bad Request
       .json({ message: 'Specified id is not valid'})
@@ -63,6 +75,7 @@ router.get('/:id/:workedId', (req, res) => {
 
   Worker.findById( workerId )
     .then( (foundWorker) => {
+   
       res.status(200).json(foundWorker);
     })
     .catch((err) => {
@@ -71,44 +84,55 @@ router.get('/:id/:workedId', (req, res) => {
 
   });
 
-// PUT update worker =============================================================
+// PUT update worker rate and tip =============================================================
 
-router.put('/:id/:workerdId/rate', (req, res, next)=>{
-
-
-  // sumar tips
-
-  // media rating
-
+router.put('/:id/:workerId/rate', (req, res, next)=>{
+  
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
 
   if(!mongoose.Types.ObjectId.isValid(req.params.workerId)) {
     res.status(400).json({ message: 'Specified id is not valid' });
     return;
   }
+  Worker.findById(req.params.workerId)
+  .then((worker)=>{
+    const tipsFinal = worker.tips + req.body.tips
+    const ratingFinal = (worker.rating + req.body.rating)/2
 
-  /* validar q es un customer y no un business  */
-
-   Worker.findByIdAndUpdate(req.params.workerId, req.body)
+    Worker.findByIdAndUpdate(req.params.workerId, {$set: {tips : tipsFinal , rating:ratingFinal}}, {new:true})
     .then(() => {
+      const newBuisenss = {business: req.params.id, points: req.body.points}
+      Customer.findByIdAndUpdate(req.session.currentUser._id, {$push: {pinnedbusiness: newBuisenss }}, {new: true}).populate('pinnedbusiness.business')
+      .then((customer)=>{
+        req.session.currentUser = customer
+        res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
 
-      Customer.findByIdAndUpdate(req.session.currentUser._id, {$push: {'pinnedbusiness.business':req.params.id, 'pinnedbuisenss.points': req.body }})
-      .then(()=>{
-        res.json({ message: `Customer with ${req.params.workerId} is updated successfully.` });
-
+      }).catch(err => {
+        res.json(err);
       })
     })
     .catch(err => {
       res.json(err);
     })
 
+  }).catch(err => {
+    res.json(err);
+
+})
 })
 
 // GET promotion details =============================================================
 
-router.get('/:id/:promoId', (req, res) => {
+router.get('/:id/promotions/:promoId', (req, res, next) => {
 
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
+  console.log("PROMOOOOOO STOY DENTRO", req.params.id )
 
-  if ( !mongoose.Types.ObjectId.isValid(id)) {
+  if ( !mongoose.Types.ObjectId.isValid(req.params.id)) {
     res
       .status(400)  //  Bad Request
       .json({ message: 'Specified id is not valid'})
@@ -117,6 +141,7 @@ router.get('/:id/:promoId', (req, res) => {
 
   Promotion.findById( req.params.promoId )
     .then( (foundPromotion) => {
+      console.log("PROMOOOOOO", foundPromotion)
       res.status(200).json(foundPromotion);
     })
     .catch((err) => {
@@ -125,13 +150,17 @@ router.get('/:id/:promoId', (req, res) => {
 
   });
 
-// PUT insert user in business =============================================================
+// PUT insert user in promotion =============================================================
 
 router.put('/:id/:promoId/update', (req, res, next) => {
 
-  Promotion.findByIdAndUpdate(req.params.promoId,{$push:{userId:req.session.currentUser._id}}, {new:true}).populate('userID')
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
+
+  Promotion.findByIdAndUpdate(req.params.promoId,{ $push: {userID:req.session.currentUser._id}}, {new:true}).populate('userID')
   .then((promotion)=>{
-    res.json({ message: `Customer with ${req.params.workerId} is updated successfully.`, promotion });
+    res.json({ message: `Promotion with ${req.params.promoId} is updated successfully.`, promotion });
   }).catch((err)=>{
     next(err)
   })

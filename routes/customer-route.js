@@ -16,6 +16,10 @@ const Promotion = require('../models/promotion')
 
 router.get('/', isLoggedIn(), (req, res, next) => {
 
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
+
   Customer.findById(req.session.currentUser._id).populate('pinnedbusiness.businessID')
     .then(customer => {
       res.json(customer);
@@ -28,6 +32,10 @@ router.get('/', isLoggedIn(), (req, res, next) => {
 // PUT update customer =============================================================
 
 router.put('/update', (req, res, next)=>{
+
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
   /* Cuidado que el form puede no estar relleno user set */
    Customer.findByIdAndUpdate(req.session.currentUser._id, req.body, {new:true})
     .then((customer) => {
@@ -42,6 +50,10 @@ router.put('/update', (req, res, next)=>{
 // PUT update wallet ========================================================
 
 router.put('/wallet/update', (req, res, next)=>{
+
+  if(req.session.currentUser.userType !== "customer"){
+    next(createError(401));
+  }
 
   const balanceFinal = req.session.currentUser.balance + req.body.balance
 

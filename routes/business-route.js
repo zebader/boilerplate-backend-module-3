@@ -18,6 +18,10 @@ const Promotion = require('./../models/promotion')
 
 router.get('/', isLoggedIn(), (req, res, next) => {
 
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
+
   Business.findById(req.session.currentUser._id).populate('workers').populate('promotions')
     .then(business => {
       res.json(business);
@@ -27,9 +31,32 @@ router.get('/', isLoggedIn(), (req, res, next) => {
     })
 });
 
+// PUT update business =============================================================
+
+router.put('/update', (req, res, next)=>{
+
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
+  /* Cuidado que el form puede no estar relleno user set */
+   Business.findByIdAndUpdate(req.session.currentUser._id, req.body, {new:true})
+    .then((business) => {
+      req.session.currentUser = business
+      res.json({ message: `Business with ${req.session.currentUser._id} is updated successfully.` });
+    })
+    .catch(err => {
+      res.json(err);
+    })
+})
+
 // POST add worker =============================================================
 
 router.post('/workers/add', (req, res, next) => {
+
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
+
   const { name, type } = req.body;
   const businessId = req.session.currentUser._id
 
@@ -66,7 +93,11 @@ router.post('/workers/add', (req, res, next) => {
 
 // GET worker details =============================================================
 
-router.get('/workers/:id', (req, res) => {
+router.get('/workers/:id', (req, res, next) => {
+
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
   const { id } = req.params;
 
   if ( !mongoose.Types.ObjectId.isValid(id)) {
@@ -89,6 +120,10 @@ router.get('/workers/:id', (req, res) => {
 // PUT update worker =============================================================
 
 router.put('/workers/:id/update', (req, res, next)=>{
+
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
 
   if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
     res.status(400).json({ message: 'Specified id is not valid' });
@@ -125,6 +160,10 @@ router.put('/workers/:id/update', (req, res, next)=>{
 
 router.delete('/workers/:id/delete', (req, res, next)=>{
 
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
+
   if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
     res.status(400).json({ message: 'Specified id is not valid' });
     return;
@@ -142,6 +181,11 @@ router.delete('/workers/:id/delete', (req, res, next)=>{
 // POST add promotion =============================================================
 
 router.post('/promotions/add', (req, res, next) => {
+
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
+
   const { name, type, pointsToUnlock } = req.body;
   const businessId = req.session.currentUser._id
 
@@ -180,7 +224,10 @@ router.post('/promotions/add', (req, res, next) => {
 
 // GET promotions details =============================================================
 
-router.get('/promotions/:id', (req, res) => {
+router.get('/promotions/:id', (req, res, next) => {
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
   const { id } = req.params;
 
   if ( !mongoose.Types.ObjectId.isValid(id)) {
@@ -202,6 +249,10 @@ router.get('/promotions/:id', (req, res) => {
 // PUT update promotion =============================================================
 
 router.put('/promotions/:id/update', (req, res, next)=>{
+
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
 
   if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
     res.status(400).json({ message: 'Specified id is not valid' });
@@ -237,6 +288,10 @@ router.put('/promotions/:id/update', (req, res, next)=>{
 // DELETE delete promotion =============================================================
 
 router.delete('/promotions/:id/delete', (req, res, next)=>{
+
+  if(req.session.currentUser.userType !== "business"){
+    next(createError(401));
+  }
 
   if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
     res.status(400).json({ message: 'Specified id is not valid' });
