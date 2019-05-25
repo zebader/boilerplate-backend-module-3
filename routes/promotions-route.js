@@ -24,6 +24,7 @@ router.get('/', isLoggedIn(), (req, res, next) => {
 
   Business.find().populate('workers').populate('promotions')
     .then(business => {
+      console.log(business)
       res.json(business);
     })
     .catch(err => {
@@ -130,7 +131,6 @@ router.get('/:id/promotions/:promoId', (req, res, next) => {
   if(req.session.currentUser.userType !== "customer"){
     next(createError(401));
   }
-  console.log("PROMOOOOOO STOY DENTRO", req.params.id )
 
   if ( !mongoose.Types.ObjectId.isValid(req.params.id)) {
     res
@@ -141,7 +141,6 @@ router.get('/:id/promotions/:promoId', (req, res, next) => {
 
   Promotion.findById( req.params.promoId )
     .then( (foundPromotion) => {
-      console.log("PROMOOOOOO", foundPromotion)
       res.status(200).json(foundPromotion);
     })
     .catch((err) => {

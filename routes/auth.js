@@ -14,7 +14,27 @@ const {
 } = require('../helpers/middlewares');
 
 router.get('/me', isLoggedIn(), (req, res, next) => {
-  res.json(req.session.currentUser);
+ 
+ if(req.session.currentUser.userType){
+
+  Business.findById(req.session.currentUser._id).populate('workers').populate('promotions')
+  .then(business => {
+    req.session.currentUser = business
+    res.json(req.session.currentUser);
+  })
+  .catch(err => {
+    res.json(err);})
+    return
+ }
+ Customer.findById(req.session.currentUser._id).populate('pinnedbusiness.businessID')
+ .then(customer => {
+   req.session.currentUser = customer
+   res.json(req.session.currentUser);
+ })
+ .catch(err => {
+   res.json(err);
+ })
+
 });
 
 router.post(
@@ -23,7 +43,6 @@ router.post(
   validationLoggin(),
   async (req, res, next) => {
     const { username, password , userType } = req.body;
-
     if (userType === "business"){
       try {
         const user = await Business.findOne({ username });
