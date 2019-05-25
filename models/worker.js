@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const workerSchema = new Schema({
     name : { type:String, required:true },
+    imgUrl: { type: String, default: 'https://static.tvtropes.org/pmwiki/pub/images/starlordinfinitywar.png'},
     type : String,
     rating : { type: Number, min:0, max:5, default:0},
     tips : { type: Number, min:0, default:0}}, {
