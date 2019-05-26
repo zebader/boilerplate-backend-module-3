@@ -34,7 +34,6 @@ router.get('/', isLoggedIn(), (req, res, next) => {
 // PUT update business =============================================================
 
 router.put('/update', (req, res, next)=>{
-
   if(req.session.currentUser.userType !== "business"){
     next(createError(401));
   }
@@ -51,7 +50,7 @@ router.put('/update', (req, res, next)=>{
 
 // POST add worker =============================================================
 
-router.post('/workers/add', (req, res, next) => {
+router.post('/workers-add', (req, res, next) => {
 
   if(req.session.currentUser.userType !== "business"){
     next(createError(401));
@@ -124,7 +123,7 @@ router.put('/workers/:id/update', (req, res, next)=>{
   if(req.session.currentUser.userType !== "business"){
     next(createError(401));
   }
-
+  
   if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
     res.status(400).json({ message: 'Specified id is not valid' });
     return;
@@ -180,7 +179,7 @@ router.delete('/workers/:id/delete', (req, res, next)=>{
 
 // POST add promotion =============================================================
 
-router.post('/promotions/add', (req, res, next) => {
+router.post('/promotions-add', (req, res, next) => {
 
   if(req.session.currentUser.userType !== "business"){
     next(createError(401));
@@ -225,6 +224,7 @@ router.post('/promotions/add', (req, res, next) => {
 // GET promotions details =============================================================
 
 router.get('/promotions/:id', (req, res, next) => {
+
   if(req.session.currentUser.userType !== "business"){
     next(createError(401));
   }

@@ -15,7 +15,7 @@ const {
 
 router.get('/me', isLoggedIn(), (req, res, next) => {
  
- if(req.session.currentUser.userType){
+ if(req.session.currentUser.userType === "business"){
 
   Business.findById(req.session.currentUser._id).populate('workers').populate('promotions')
   .then(business => {
