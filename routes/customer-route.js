@@ -9,10 +9,7 @@ const {
   validationLoggin,
 } = require('../helpers/middlewares');
 
-const Business = require('../models/business');
 const Customer = require('../models/customer');
-const Worker = require('../models/worker');
-const Promotion = require('../models/promotion')
 
 router.get('/', isLoggedIn(), (req, res, next) => {
 
@@ -20,7 +17,7 @@ router.get('/', isLoggedIn(), (req, res, next) => {
     next(createError(401));
   }
 
-  Customer.findById(req.session.currentUser._id).populate('pinnedbusiness.businessID')
+  Customer.findById(req.session.currentUser._id).populate('pinnedbusiness.business')
     .then(customer => {
       res.json(customer);
     })
