@@ -24,7 +24,6 @@ router.get('/', isLoggedIn(), (req, res, next) => {
 
   Business.find().populate('workers').populate('promotions')
     .then(business => {
-      console.log(business)
       res.json(business);
     })
     .catch(err => {
@@ -87,7 +86,7 @@ router.get('/:id/workers/:workerId', (req, res, next) => {
 
 // PUT update worker rate and tip =============================================================
 
-router.put('/:id/:workerId/rate', (req, res, next)=>{
+router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
   
   if(req.session.currentUser.userType !== "customer"){
     next(createError(401));
@@ -151,7 +150,7 @@ router.get('/:id/promotions/:promoId', (req, res, next) => {
 
 // PUT insert user in promotion =============================================================
 
-router.put('/:id/:promoId/update', (req, res, next) => {
+router.put('/:id/promotions/:promoId/rate', (req, res, next) => {
 
   if(req.session.currentUser.userType !== "customer"){
     next(createError(401));
