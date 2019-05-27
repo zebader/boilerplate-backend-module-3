@@ -98,13 +98,18 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
   }
   Worker.findById(req.params.workerId)
   .then((worker)=>{
-    const tipsFinal = worker.tips + req.body.tips
-    const ratingFinal = (worker.rating + req.body.rating)/2
+
+    const tipsFinal = worker.tips + Number(req.body.tips)
+    if(worker.rating === 0 && req.body.rating !== 0) {worker.rating = 5}
+    const ratingFinal = Math.round((worker.rating + Number(req.body.rating))/2)
+
+    console.log(req.body)
 
     Worker.findByIdAndUpdate(req.params.workerId, {$set: {tips : tipsFinal , rating:ratingFinal}}, {new:true})
     .then(() => {
-      const newBuisenss = {business: req.params.id, points: req.body.points}
-      Customer.findByIdAndUpdate(req.session.currentUser._id, {$push: {pinnedbusiness: newBuisenss }}, {new: true}).populate('pinnedbusiness.business')
+
+      const newBusiness = { business: req.params.id, points: Number(req.body.points) }
+      Customer.findByIdAndUpdate(req.session.currentUser._id, {$push: {pinnedbusiness: newBusiness }}, {balance: (balance - Number(req.body.tips)) }, {new: true}).populate('pinnedbusiness.business')
       .then((customer)=>{
         req.session.currentUser = customer
         res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
@@ -119,6 +124,65 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
 
   }).catch(err => {
     res.json(err);
+
+/* 
+    Customer.findById(req.session.currentUser._id)
+    .then((customer) =>{
+
+
+      console.log("Customer step1 ")
+
+      let businessExists = false;
+
+      customer.pinnedbusiness.forEach((elem)=>{
+          const { ObjectID } = elem.business
+          console.log("Customer step2 ", Object.values( ObjectID ), typeof req.params.id)
+        if ( ObjectID === req.params.id)
+        {return businessExists = true}
+        else{
+          return
+        }
+      })
+
+      console.log("Customer step3 ", businessExists)
+
+      if (!businessExists){
+
+        const newBusiness = { business: req.params.id, points: Number(req.body.points) }
+        
+        Customer.findByIdAndUpdate(req.session.currentUser._id, {$push: {pinnedbusiness: newBusiness }}, {balance: (balance - Number(req.body.tips)) }, {new: true}).populate('pinnedbusiness.business')
+        .then((customer)=>{
+          console.log("Customer step4 ", customer)
+          req.session.currentUser = customer
+          res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
+  
+        }).catch(err => {
+          res.json(err);
+        })
+      }else{
+
+        customer.pinnedbusiness.forEach((elem)=>{
+          if (elem.business.id === req.params.id){
+            const pointsFinal = elem.points + Number(req.body.points)
+
+            
+            Customer.findByIdAndUpdate(req.session.currentUser._id, { "pinnedbusiness.business": req.params.id },{ $set: { "pinnedbusiness.$.points" : pointsFinal }}, {balance: (balance - Number(req.body.tips)) }, {new: true}).populate('pinnedbusiness.business')
+            .then((customer)=>{
+              req.session.currentUser = customer
+              res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
+
+            }).catch(err => {
+              res.json(err);
+            })
+          }
+        })
+
+      }
+
+    }).catch(err => {
+      res.json(err);
+    }) */
+
 
 })
 })

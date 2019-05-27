@@ -51,8 +51,8 @@ router.put('/wallet/update', (req, res, next)=>{
   if(req.session.currentUser.userType !== "customer"){
     next(createError(401));
   }
-
-  const balanceFinal = req.session.currentUser.balance + req.body.balance
+  const balanceFinal = req.session.currentUser.balance + Number(req.body.balance)
+  console.log(" body ",typeof balanceFinal, balanceFinal)
 
   Customer.findByIdAndUpdate(req.session.currentUser._id, {$set: {balance : balanceFinal}}, {new:true})
   .then((customer) => {
