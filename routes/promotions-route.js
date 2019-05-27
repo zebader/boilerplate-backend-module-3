@@ -103,14 +103,17 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
     if(worker.rating === 0 && req.body.rating !== 0) {worker.rating = 5}
     const ratingFinal = Math.round((worker.rating + Number(req.body.rating))/2)
 
-    console.log(req.body)
-
+    
+    
     Worker.findByIdAndUpdate(req.params.workerId, {$set: {tips : tipsFinal , rating:ratingFinal}}, {new:true})
     .then(() => {
+      
+      console.log(req.body)
 
       const newBusiness = { business: req.params.id, points: Number(req.body.points) }
-      Customer.findByIdAndUpdate(req.session.currentUser._id, {$push: {pinnedbusiness: newBusiness }}, {balance: (balance - Number(req.body.tips)) }, {new: true}).populate('pinnedbusiness.business')
+      Customer.findByIdAndUpdate(req.session.currentUser._id, {$push: {pinnedbusiness: newBusiness }},/* , {balance: (balance - Number(req.body.tips)) } */ {new: true}).populate('pinnedbusiness.business')
       .then((customer)=>{
+        console.log("customer" , customer)
         req.session.currentUser = customer
         res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
 
