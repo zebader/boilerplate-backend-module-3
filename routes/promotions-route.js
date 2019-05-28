@@ -111,15 +111,31 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
       console.log(req.body)
 
       const newBusiness = { business: req.params.id, points: Number(req.body.points) }
-      Customer.findByIdAndUpdate(req.session.currentUser._id, {$push: {pinnedbusiness: newBusiness }},/* , {balance: (balance - Number(req.body.tips)) } */ {new: true}).populate('pinnedbusiness.business')
+      Customer.findOne({_id:req.session.currentUser._id, 'pinnedBusiness.business':req.params.id})
       .then((customer)=>{
-        console.log("customer" , customer)
-        req.session.currentUser = customer
-        res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
+        if(customer){
 
-      }).catch(err => {
-        res.json(err);
+          let newPoints = 0;
+
+          customer.pinnedBusiness.forEach((elem)=>{
+
+            if(elem.business.equals(req.params.id)){
+                newPoints = elem.points + newBusiness.points
+            }
+            
+          })
+          Customer.findOneAndUpdate({_id:req.session.currentUser._id, 'pinnedBusiness.business':req.params.id}, {$set: {'pinnedbusiness.$.points': newPoints }},/* , {balance: (balance - Number(req.body.tips)) } */ {new: true}).populate('pinnedbusiness.business')
+          .then((customer)=>{
+
+            console.log("customer" , customer)
+            req.session.currentUser = customer
+            res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
+          }).catch(err => {
+            res.json(err);})
+
+        }
       })
+
     })
     .catch(err => {
       res.json(err);
