@@ -1,13 +1,15 @@
 {
-  "main.css": "/static/css/main.469e1d21.chunk.css",
-  "main.js": "/static/js/main.f92ae324.chunk.js",
-  "main.js.map": "/static/js/main.f92ae324.chunk.js.map",
+  "main.css": "/static/css/main.9161a547.chunk.css",
+  "main.js": "/static/js/main.cd01cb4e.chunk.js",
+  "main.js.map": "/static/js/main.cd01cb4e.chunk.js.map",
   "runtime~main.js": "/static/js/runtime~main.a8a9905a.js",
   "runtime~main.js.map": "/static/js/runtime~main.a8a9905a.js.map",
-  "static/js/2.15787e6a.chunk.js": "/static/js/2.15787e6a.chunk.js",
-  "static/js/2.15787e6a.chunk.js.map": "/static/js/2.15787e6a.chunk.js.map",
+  "static/js/2.ee5e965d.chunk.js": "/static/js/2.ee5e965d.chunk.js",
+  "static/js/2.ee5e965d.chunk.js.map": "/static/js/2.ee5e965d.chunk.js.map",
   "index.html": "/index.html",
-  "precache-manifest.9df7b5d2255212d1d48fbe496b5305ba.js": "/precache-manifest.9df7b5d2255212d1d48fbe496b5305ba.js",
+  "precache-manifest.a7eefed8a61ea585543433cfaa7910ef.js": "/precache-manifest.a7eefed8a61ea585543433cfaa7910ef.js",
   "service-worker.js": "/service-worker.js",
-  "static/css/main.469e1d21.chunk.css.map": "/static/css/main.469e1d21.chunk.css.map"
+  "static/css/main.9161a547.chunk.css.map": "/static/css/main.9161a547.chunk.css.map",
+  "static/media/donut-shop.svg": "/static/media/donut-shop.617f9329.svg",
+  "static/media/male.svg": "/static/media/male.51e95e5f.svg"
 }

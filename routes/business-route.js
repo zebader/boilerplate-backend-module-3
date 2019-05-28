@@ -2,6 +2,7 @@ const express = require('express');
 const createError = require('http-errors');
 const mongoose = require('mongoose');
 const router = express.Router();
+const parser = require('../config/cloudinary');
 
 const {
   isLoggedIn,
@@ -41,7 +42,7 @@ router.put('/update', (req, res, next)=>{
    Business.findByIdAndUpdate(req.session.currentUser._id, req.body, {new:true})
     .then((business) => {
       req.session.currentUser = business
-      res.json({ message: `Business with ${req.session.currentUser._id} is updated successfully.` });
+      res.json(business);
     })
     .catch(err => {
       res.json(err);
@@ -306,5 +307,16 @@ router.delete('/promotions/:id/delete', (req, res, next)=>{
       res.json(err);
     })
 })
+
+  // UPLOAD IMAGE =============================================================================
+
+  router.post('/image', parser.single('photo'), (req, res, next) => {
+    console.log('file upload');
+    if (!req.file) {
+      next(new Error('No file uploaded!'));
+    };
+    const imgUrl = req.file.secure_url;
+    res.json(imgUrl).status(200);
+  });
 
 module.exports = router;
