@@ -57,7 +57,7 @@ router.post('/workers-add', (req, res, next) => {
     next(createError(401));
   }
 
-  const { name, type } = req.body;
+  const { name, type,imgUrl } = req.body;
   const businessId = req.session.currentUser._id
 
   Business.findById(req.session.currentUser._id).populate('workers')
@@ -69,7 +69,7 @@ router.post('/workers-add', (req, res, next) => {
     })
 
     if (!workerExists){
-      Worker.create({ name, type })
+      Worker.create({ name, type, imgUrl })
       .then((newWorker)=>{
 
         Business.findByIdAndUpdate( businessId, { $push:{ workers: newWorker } }, {new:true})
@@ -186,7 +186,7 @@ router.post('/promotions-add', (req, res, next) => {
     next(createError(401));
   }
 
-  const { name, type, pointsToUnlock } = req.body;
+  const { name, type, pointsToUnlock,imgUrl } = req.body;
   const businessId = req.session.currentUser._id
 
   Business.findById(req.session.currentUser._id).populate('promotions')
@@ -198,7 +198,7 @@ router.post('/promotions-add', (req, res, next) => {
     })
 
     if (!promotionExists){
-      Promotion.create({ name, type, pointsToUnlock })
+      Promotion.create({ name, type, pointsToUnlock,imgUrl })
       .then((newPromotion)=>{
 
         Business.findByIdAndUpdate( businessId, { $push:{ promotions: newPromotion } })
