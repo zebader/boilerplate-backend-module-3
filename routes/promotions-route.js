@@ -75,7 +75,6 @@ router.get('/:id/workers/:workerId', (req, res, next) => {
 
   Worker.findById( workerId )
     .then( (foundWorker) => {
-   
       res.status(200).json(foundWorker);
     })
     .catch((err) => {
@@ -87,7 +86,7 @@ router.get('/:id/workers/:workerId', (req, res, next) => {
 // PUT update worker rate and tip =============================================================
 
 router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
-  
+
   if(req.session.currentUser.userType !== "customer"){
     next(createError(401));
   }
@@ -109,21 +108,18 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
       const newBusiness = { business: req.params.id, points: Number(req.body.points) }
       
       const businessId = mongoose.Types.ObjectId(req.params.id)
-      
+
       Customer.find({ _id:req.session.currentUser._id, 'pinnedbusiness.business':businessId})
       .then((customer)=>{
-            
+
+        if(customer.length !== 0){
             let balanceFinal = customer[0].balance - Number(req.body.tips)
-
-             if(customer.length !== 0){
-
             let newPoints = 0;
             
             customer[0].pinnedbusiness.forEach((elem)=>{
               if(elem.business.equals(req.params.id)){
                 newPoints = elem.points + newBusiness.points
               } 
-
             })
        
             Customer.findOneAndUpdate({_id:req.session.currentUser._id, 'pinnedbusiness.business':req.params.id},
@@ -137,19 +133,28 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
               res.json(err);})
               
             } else {
+              
+              Customer.findOneAndUpdate({_id:req.session.currentUser._id},
+                {$push: {pinnedbusiness: newBusiness }},
+                {new: true}).populate('pinnedbusiness.business')
+                .then((customer)=>{
 
-// WHAT ! ===============================================================================================
-
-              console.log("antes")
-
-            Customer.findOneAndUpdate({_id:req.session.currentUser._id}, {$push: {pinnedbusiness: newBusiness }}, {new: true}).populate('pinnedbusiness.business')
-            .then((customer)=>{
-
-              console.log("customer" , customer)
+                  let balanceFinal = customer.balance - Number(req.body.tips)
 
               req.session.currentUser = customer
               res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
-      
+
+                  Customer.findOneAndUpdate({_id:req.session.currentUser._id},
+                  {$set: {balance:balanceFinal} },
+                  {new: true}).populate('pinnedbusiness.business')
+                  .then((customer)=>{
+
+                      req.session.currentUser = customer
+                      res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
+
+                }).catch(err => {
+                    res.json(err);
+                  })
             }).catch(err => {
               res.json(err);
             })
@@ -196,6 +201,7 @@ router.get('/:id/promotions/:promoId', (req, res, next) => {
 // PUT insert user in promotion =============================================================
 
 router.put('/:id/promotions/:promoId/rate', (req, res, next) => {
+
   console.log(req.session.currentUser._id)
 
   if(req.session.currentUser.userType !== "customer"){
