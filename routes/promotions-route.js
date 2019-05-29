@@ -112,7 +112,9 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
       
       Customer.find({ _id:req.session.currentUser._id, 'pinnedbusiness.business':businessId})
       .then((customer)=>{
-        
+            
+            let balanceFinal = customer[0].balance - Number(req.body.tips)
+
              if(customer.length !== 0){
 
             let newPoints = 0;
@@ -123,10 +125,12 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
               } 
 
             })
-            
-            Customer.findOneAndUpdate({_id:req.session.currentUser._id, 'pinnedbusiness.business':req.params.id}, {$set: {'pinnedbusiness.$.points': newPoints }}, {new: true}).populate('pinnedbusiness.business')
+       
+            Customer.findOneAndUpdate({_id:req.session.currentUser._id, 'pinnedbusiness.business':req.params.id},
+            {$set: {'pinnedbusiness.$.points': newPoints }, balance:balanceFinal },
+            {new: true}).populate('pinnedbusiness.business')
             .then((customer)=>{
-              
+
               req.session.currentUser = customer
               res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
             }).catch(err => {
@@ -134,9 +138,15 @@ router.put('/:id/workers/:workerId/rate', (req, res, next)=>{
               
             } else {
 
+// WHAT ! ===============================================================================================
+
+              console.log("antes")
+
             Customer.findOneAndUpdate({_id:req.session.currentUser._id}, {$push: {pinnedbusiness: newBusiness }}, {new: true}).populate('pinnedbusiness.business')
             .then((customer)=>{
+
               console.log("customer" , customer)
+
               req.session.currentUser = customer
               res.json({ message: `Worker with ${req.params.workerId} is been tip and rated.`, customer });
       
@@ -186,6 +196,7 @@ router.get('/:id/promotions/:promoId', (req, res, next) => {
 // PUT insert user in promotion =============================================================
 
 router.put('/:id/promotions/:promoId/rate', (req, res, next) => {
+  console.log(req.session.currentUser._id)
 
   if(req.session.currentUser.userType !== "customer"){
     next(createError(401));
