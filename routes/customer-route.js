@@ -37,7 +37,7 @@ router.put('/update', (req, res, next)=>{
    Customer.findByIdAndUpdate(req.session.currentUser._id, req.body, {new:true})
     .then((customer) => {
       req.session.currentUser = customer
-      res.json({ message: `Customer with ${req.session.currentUser._id} is updated successfully.` });
+      res.json(customer);
     })
     .catch(err => {
       res.json(err);
