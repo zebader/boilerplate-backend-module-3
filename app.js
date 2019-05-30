@@ -71,6 +71,13 @@ app.use('/api/business', business);
 app.use('/api/customer', customer);
 app.use('/api/promotions', promotions);
 
+
+// REACT APP index.html	
+app.use((req, res, next) => {
+  // If no routes match, send them the React HTML.
+  res.sendFile(__dirname + "/public/index.html");
+});
+
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   res.status(404).json({ code: 'not found' });
@@ -87,10 +94,5 @@ app.use((err, req, res, next) => {
   }
 });
 
-// REACT APP index.html	
-app.use((req, res, next) => {
-  // If no routes match, send them the React HTML.
-  res.sendFile(__dirname + "/public/index.html");
-});
 
 module.exports = app;
