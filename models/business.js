@@ -7,7 +7,7 @@ const businessSchema = new Schema({
   email: { type:String, required:true, unique:true}, 
   location: { type:String, required:true},
   userType: { type: String, default: 'business'},
-  imgUrl:  {type: String, default: 'https://www.cinematographe.it/wp-content/uploads/2016/03/grootsupper1.jpg' },
+  imgUrl:  {type: String, default: '/static/media/business_default.svg' },
   workers: [{type: Schema.Types.ObjectId, ref: 'Worker'}],
   promotions: [{type: Schema.Types.ObjectId, ref: 'Promotion'}]
 }, {
